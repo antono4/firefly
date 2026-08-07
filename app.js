@@ -77,8 +77,6 @@ const stylePresets = {
 document.addEventListener('DOMContentLoaded', initApp);
 
 function initApp() {
-    console.log('Lumina AI: Initializing...');
-    
     // Get DOM elements
     elements.promptInput = document.getElementById('prompt-input');
     elements.generateBtn = document.getElementById('generate-btn');
@@ -99,17 +97,10 @@ function initApp() {
     elements.historyEmpty = document.getElementById('history-empty');
     elements.clearHistory = document.getElementById('clear-history');
     
-    console.log('Elements found:', {
-        promptInput: !!elements.promptInput,
-        generateBtn: !!elements.generateBtn
-    });
-    
     loadFromStorage();
     initializeEventListeners();
     updateUI();
     showInspirationPrompt();
-    
-    console.log('Lumina AI: Initialization complete');
 }
 
 // === Storage Functions ===
@@ -209,26 +200,12 @@ function updatePrompt(e) {
 }
 
 function applyPrompt(prompt) {
-    if (!prompt) {
-        console.log('applyPrompt called with empty prompt');
-        return;
-    }
+    if (!prompt) return;
     
-    console.log('applyPrompt called with:', prompt);
-    
-    // Update state first
     state.prompt = prompt;
     
-    // Update textarea value directly
     if (elements.promptInput) {
         elements.promptInput.value = prompt;
-        console.log('Set textarea value to:', prompt);
-    }
-    
-    // Also update any placeholder elements if needed
-    const placeholderDiv = elements.promptInput?.parentElement?.querySelector('.placeholder-content');
-    if (placeholderDiv) {
-        placeholderDiv.textContent = prompt;
     }
 }
 
@@ -286,25 +263,15 @@ function selectStyle(btn) {
 
 // === Image Generation ===
 async function handleGenerate() {
-    console.log('handleGenerate called');
-    console.log('elements.promptInput:', elements.promptInput ? 'found' : 'null');
-    
     // Get prompt from textarea - this is the most reliable source
     const textareaValue = elements.promptInput ? elements.promptInput.value.trim() : '';
-    console.log('textareaValue:', textareaValue);
-    console.log('state.prompt:', state.prompt);
-    
     const currentPrompt = textareaValue || state.prompt;
     
     if (!currentPrompt) {
-        console.log('No prompt found! textarea:', textareaValue, 'state:', state.prompt);
         showToast('Please enter a prompt to generate');
         if (elements.promptInput) elements.promptInput.focus();
         return;
     }
-    
-    console.log('Using prompt:', currentPrompt);
-    showToast('Generating image...');
     
     // Update state with current prompt
     state.prompt = currentPrompt;
