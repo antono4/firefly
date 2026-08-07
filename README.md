@@ -12,7 +12,7 @@
 ## ✨ Features
 
 ### 🤖 Real AI Image Generation
-- **Stable Diffusion Integration** - Uses Hugging Face's Stable Diffusion 2.1 for realistic AI-generated images
+- **MiniMax-H3 Model** - Uses Hugging Face's MiniMax-H3 model for high-quality AI-generated images
 - **Free API Access** - Get your free API token from Hugging Face
 - **Fallback Mode** - Works without API for procedural generation
 

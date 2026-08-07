@@ -270,10 +270,10 @@ async function generateWithAI(prompt, style) {
     const stylePreset = stylePresets[style] || stylePresets['digital-art'];
     const fullPrompt = `${prompt}, ${stylePreset.prompt}`;
     
-    showToast('Connecting to AI model...', 'info');
+    showToast('Connecting to MiniMax AI model...', 'info');
     
     const response = await fetch(
-        "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1-base",
+        "https://api-inference.huggingface.co/models/MiniMaxAI/MiniMax-H3",
         {
             method: "POST",
             headers: {
@@ -284,7 +284,9 @@ async function generateWithAI(prompt, style) {
                 inputs: fullPrompt,
                 parameters: {
                     guidance_scale: state.quality >= 4 ? 7.5 : 5,
-                    num_inference_steps: state.quality >= 4 ? 30 : 20
+                    num_inference_steps: state.quality >= 4 ? 30 : 20,
+                    width: 512,
+                    height: 512
                 }
             })
         }
