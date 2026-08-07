@@ -1,5 +1,4 @@
-// === Lumina AI - Creative Image Generator with Real AI ===
-// Application State
+// === Lumina AI - Image Generator with Real AI ===
 const state = {
     prompt: '',
     aspectRatio: '1:1',
@@ -7,7 +6,6 @@ const state = {
     quality: 4,
     isGenerating: false,
     currentImage: null,
-    gallery: [],
     history: [],
     settings: {
         apiProvider: 'huggingface',
@@ -18,68 +16,28 @@ const state = {
     }
 };
 
-// === DOM Elements ===
-const elements = {
-    promptInput: null,
-    generateBtn: null,
-    canvasContainer: null,
-    canvasPlaceholder: null,
-    canvasLoading: null,
-    outputCanvas: null,
-    canvasActions: null,
-    styleBadge: null,
-    ratioBadge: null,
-    qualitySlider: null,
-    inspirationText: null,
-    shufflePrompt: null,
-    toast: null,
-    galleryGrid: null,
-    galleryEmpty: null,
-    historyList: null,
-    historyEmpty: null,
-    clearHistory: null,
-    settingsModal: null,
-    settingsBtn: null,
-    closeSettingsBtn: null,
-    saveSettingsBtn: null,
-    useRealAICheckbox: null
-};
+const elements = {};
 
-// === Inspiration Prompts ===
 const inspirationPrompts = [
-    "A bioluminescent underwater city where ancient coral structures have evolved into futuristic architecture",
-    "Steampunk Victorian-era airship docked at a floating garden in the clouds",
-    "Samurai standing on a cliff edge during a dramatic typhoon with lightning",
-    "A cozy bookshop that exists inside a giant sleeping dragon",
-    "Hyper-detailed macro photography of a raindrop landing on a leaf",
-    "Art Deco cityscape from the 1920s with golden spires",
-    "A forest clearing where magical deer with crystalline antlers gather",
-    "Cyberpunk street food vendor stall in neon-lit alley"
+    "A bioluminescent underwater city where ancient coral structures",
+    "Steampunk Victorian-era airship docked at floating garden",
+    "Samurai on cliff edge during dramatic typhoon",
+    "Cozy bookshop inside a giant sleeping dragon",
+    "Hyper-detailed macro photography of raindrop on leaf",
+    "Art Deco cityscape from 1920s",
+    "Forest clearing with magical deer",
+    "Cyberpunk street food vendor stall"
 ];
 
-// === Style Presets ===
 const stylePresets = {
-    photorealistic: {
-        prompt: "photorealistic, ultra detailed, 8K, professional photography, natural lighting, high dynamic range"
-    },
-    'digital-art': {
-        prompt: "digital art, concept art, digital painting, detailed, vibrant colors, rich saturation"
-    },
-    'concept-art': {
-        prompt: "concept art, artstation, trending, detailed environment, matte painting, cinematic colors"
-    },
-    anime: {
-        prompt: "anime style, Studio Ghibli inspired, anime art, cel shaded, beautiful background"
-    },
-    '3d-render': {
-        prompt: "3D render, Cinema 4D, Octane render, ray tracing, professional studio lighting"
-    },
-    'oil-painting': {
-        prompt: "oil painting, classical art, brush strokes visible, museum quality, fine art, Renaissance style"
-    }
+    photorealistic: { prompt: "photorealistic, ultra detailed, 8K, professional photography" },
+    'digital-art': { prompt: "digital art, concept art, digital painting, vibrant colors" },
+    'concept-art': { prompt: "concept art, artstation, detailed environment, cinematic" },
+    anime: { prompt: "anime style, Studio Ghibli inspired, anime art" },
+    '3d-render': { prompt: "3D render, Cinema 4D, Octane render, ray tracing" },
+    'oil-painting': { prompt: "oil painting, classical art, brush strokes, museum quality" }
 };
 
-// === Initialize Application ===
 document.addEventListener('DOMContentLoaded', initApp);
 
 function initApp() {
@@ -96,8 +54,6 @@ function initApp() {
     elements.inspirationText = document.getElementById('inspiration-text');
     elements.shufflePrompt = document.getElementById('shuffle-prompt');
     elements.toast = document.getElementById('toast');
-    elements.galleryGrid = document.getElementById('gallery-grid');
-    elements.galleryEmpty = document.getElementById('gallery-empty');
     elements.historyList = document.getElementById('history-list');
     elements.historyEmpty = document.getElementById('history-empty');
     elements.clearHistory = document.getElementById('clear-history');
@@ -110,19 +66,16 @@ function initApp() {
     loadFromStorage();
     loadSettings();
     initializeEventListeners();
-    updateUI();
+    renderHistory();
     showInspirationPrompt();
 }
 
 function loadFromStorage() {
-    const savedGallery = localStorage.getItem('lumina_gallery');
     const savedHistory = localStorage.getItem('lumina_history');
-    if (savedGallery) { try { state.gallery = JSON.parse(savedGallery); } catch (e) { state.gallery = []; } }
     if (savedHistory) { try { state.history = JSON.parse(savedHistory); } catch (e) { state.history = []; } }
 }
 
 function saveToStorage() {
-    localStorage.setItem('lumina_gallery', JSON.stringify(state.gallery));
     localStorage.setItem('lumina_history', JSON.stringify(state.history));
 }
 
@@ -132,24 +85,14 @@ function loadSettings() {
     if (elements.useRealAICheckbox) elements.useRealAICheckbox.checked = state.settings.useRealAI;
     const providerRadio = document.querySelector(`input[name="api-provider"][value="${state.settings.apiProvider}"]`);
     if (providerRadio) { providerRadio.checked = true; updateProviderInputs(); }
-    const hfToken = document.getElementById('hf-token');
-    const openaiKey = document.getElementById('openai-key');
-    const stabilityKey = document.getElementById('stability-key');
-    if (hfToken) hfToken.value = state.settings.hfToken || '';
-    if (openaiKey) openaiKey.value = state.settings.openaiKey || '';
-    if (stabilityKey) stabilityKey.value = state.settings.stabilityKey || '';
+    if (document.getElementById('hf-token')) document.getElementById('hf-token').value = state.settings.hfToken || '';
 }
 
 function saveSettings() {
     const providerRadio = document.querySelector('input[name="api-provider"]:checked');
     state.settings.apiProvider = providerRadio ? providerRadio.value : 'huggingface';
     state.settings.useRealAI = elements.useRealAICheckbox ? elements.useRealAICheckbox.checked : false;
-    const hfToken = document.getElementById('hf-token');
-    const openaiKey = document.getElementById('openai-key');
-    const stabilityKey = document.getElementById('stability-key');
-    state.settings.hfToken = hfToken ? hfToken.value : '';
-    state.settings.openaiKey = openaiKey ? openaiKey.value : '';
-    state.settings.stabilityKey = stabilityKey ? stabilityKey.value : '';
+    state.settings.hfToken = document.getElementById('hf-token')?.value || '';
     localStorage.setItem('lumina_settings', JSON.stringify(state.settings));
     showToast('Settings saved!', 'success');
     closeSettingsModal();
@@ -157,21 +100,15 @@ function saveSettings() {
 
 function openSettingsModal() { if (elements.settingsModal) elements.settingsModal.classList.add('active'); }
 function closeSettingsModal() { if (elements.settingsModal) elements.settingsModal.classList.remove('active'); }
-
 function updateProviderInputs() {
     const providerRadio = document.querySelector('input[name="api-provider"]:checked');
     const hfToken = document.getElementById('hf-token');
-    const openaiKey = document.getElementById('openai-key');
-    const stabilityKey = document.getElementById('stability-key');
     if (hfToken) hfToken.disabled = providerRadio?.value !== 'huggingface';
-    if (openaiKey) openaiKey.disabled = providerRadio?.value !== 'openai';
-    if (stabilityKey) stabilityKey.disabled = providerRadio?.value !== 'stability';
 }
 
 function initializeEventListeners() {
     document.querySelectorAll('.nav-btn').forEach(btn => { btn.addEventListener('click', () => switchTab(btn.dataset.tab)); });
-    elements.promptInput.addEventListener('input', updatePrompt);
-    elements.promptInput.addEventListener('change', updatePrompt);
+    elements.promptInput.addEventListener('input', (e) => { state.prompt = e.target.value; });
     document.querySelector('.btn-magic').addEventListener('click', enhancePrompt);
     document.querySelectorAll('.ratio-btn').forEach(btn => { btn.addEventListener('click', () => selectRatio(btn)); });
     document.querySelectorAll('.style-btn').forEach(btn => { btn.addEventListener('click', () => selectStyle(btn)); });
@@ -181,42 +118,37 @@ function initializeEventListeners() {
     document.querySelectorAll('.quick-prompt').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const prompt = e.target.dataset.prompt || e.target.closest('.quick-prompt').dataset.prompt;
-            applyPrompt(prompt);
+            if (elements.promptInput) elements.promptInput.value = prompt;
+            state.prompt = prompt;
         });
     });
-    document.querySelectorAll('.filter-btn').forEach(btn => { btn.addEventListener('click', () => filterGallery(btn.dataset.filter)); });
     elements.clearHistory.addEventListener('click', clearHistory);
     document.querySelectorAll('.action-btn').forEach((btn, index) => { btn.addEventListener('click', () => handleCanvasAction(index)); });
     if (elements.settingsBtn) elements.settingsBtn.addEventListener('click', openSettingsModal);
     if (elements.closeSettingsBtn) elements.closeSettingsBtn.addEventListener('click', closeSettingsModal);
     if (elements.saveSettingsBtn) elements.saveSettingsBtn.addEventListener('click', saveSettings);
     document.querySelectorAll('input[name="api-provider"]').forEach(radio => { radio.addEventListener('change', updateProviderInputs); });
-    if (elements.settingsModal) {
-        elements.settingsModal.addEventListener('click', (e) => { if (e.target === elements.settingsModal) closeSettingsModal(); });
-    }
+    if (elements.settingsModal) { elements.settingsModal.addEventListener('click', (e) => { if (e.target === elements.settingsModal) closeSettingsModal(); }); }
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && e.ctrlKey && !state.isGenerating) handleGenerate();
         if (e.key === 'Escape' && elements.settingsModal?.classList.contains('active')) closeSettingsModal();
     });
 }
 
-function updatePrompt(e) { state.prompt = e.target.value; }
-function applyPrompt(prompt) { if (!prompt) return; state.prompt = prompt; if (elements.promptInput) elements.promptInput.value = prompt; }
-
 function switchTab(tabName) {
     document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.tab === tabName); });
     document.querySelectorAll('section').forEach(section => { section.classList.remove('active'); });
     document.getElementById(`${tabName}-section`).classList.add('active');
-    if (tabName === 'gallery') renderGallery();
-    else if (tabName === 'history') renderHistory();
+    if (tabName === 'history') renderHistory();
 }
 
 function enhancePrompt() {
     const currentPrompt = elements.promptInput.value.trim() || state.prompt;
     if (!currentPrompt) { showToast('Please enter a prompt first'); return; }
     const preset = stylePresets[state.style];
-    applyPrompt(`${currentPrompt}, ${preset.prompt}`);
-    showToast('Prompt enhanced with style keywords!', 'info');
+    if (elements.promptInput) elements.promptInput.value = `${currentPrompt}, ${preset.prompt}`;
+    state.prompt = `${currentPrompt}, ${preset.prompt}`;
+    showToast('Prompt enhanced!', 'info');
 }
 
 function selectRatio(btn) {
@@ -236,7 +168,7 @@ function selectStyle(btn) {
 async function handleGenerate() {
     const textareaValue = elements.promptInput ? elements.promptInput.value.trim() : '';
     const currentPrompt = textareaValue || state.prompt;
-    if (!currentPrompt) { showToast('Please enter a prompt to generate'); if (elements.promptInput) elements.promptInput.focus(); return; }
+    if (!currentPrompt) { showToast('Please enter a prompt'); if (elements.promptInput) elements.promptInput.focus(); return; }
     state.prompt = currentPrompt;
     if (state.isGenerating) return;
     state.isGenerating = true;
@@ -255,10 +187,10 @@ async function handleGenerate() {
         }
         displayGeneratedImage(imageData);
         saveToHistory(state.prompt, imageData, state.style, state.aspectRatio);
-        showToast('Image generated successfully!', 'success');
+        showToast('Image generated!', 'success');
     } catch (error) {
-        console.error('Generation error:', error);
-        showToast('Failed to generate: ' + error.message, 'error');
+        console.error('Error:', error);
+        showToast('Error: ' + error.message, 'error');
     } finally {
         state.isGenerating = false;
         updateGenerateButton();
@@ -269,34 +201,19 @@ async function handleGenerate() {
 async function generateWithAI(prompt, style) {
     const stylePreset = stylePresets[style] || stylePresets['digital-art'];
     const fullPrompt = `${prompt}, ${stylePreset.prompt}`;
-    
-    showToast('Connecting to MiniMax AI model...', 'info');
-    
+    showToast('Connecting to MiniMax AI...', 'info');
     const response = await fetch(
         "https://api-inference.huggingface.co/models/MiniMaxAI/MiniMax-H3",
         {
             method: "POST",
-            headers: {
-                "Authorization": `Bearer ${state.settings.hfToken}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                inputs: fullPrompt,
-                parameters: {
-                    guidance_scale: state.quality >= 4 ? 7.5 : 5,
-                    num_inference_steps: state.quality >= 4 ? 30 : 20,
-                    width: 512,
-                    height: 512
-                }
-            })
+            headers: { "Authorization": `Bearer ${state.settings.hfToken}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ inputs: fullPrompt, parameters: { guidance_scale: 7.5, num_inference_steps: 30 } })
         }
     );
-    
     if (!response.ok) {
         const error = await response.json().catch(() => ({}));
         throw new Error(error.error || `API Error: ${response.status}`);
     }
-    
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -310,20 +227,17 @@ function generateProceduralImage(prompt, style) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const [w, h] = state.aspectRatio.split(':').map(Number);
-    const maxDim = 512;
-    if (w > h) { canvas.width = maxDim; canvas.height = Math.round(maxDim * h / w); }
-    else { canvas.height = maxDim; canvas.width = Math.round(maxDim * w / h); }
+    canvas.width = 512; canvas.height = Math.round(512 * h / w);
     
     const colorSchemes = {
-        photorealistic: [['#2d4a6f', '#5a7fa8', '#8eb3d9'], ['#3d2b4f', '#6b4d8a', '#9a7bc5']],
-        'digital-art': [['#1a1a3e', '#4a3f8a', '#8a6fd4'], ['#0f2d4a', '#2d6b8a', '#5aa8c4']],
-        'concept-art': [['#2d1b4e', '#5a3d8a', '#9a6fd4'], ['#1b3d2d', '#3d6b5a', '#6ba88a']],
-        anime: [['#ff9a9e', '#fecfef', '#ffe4e6'], ['#a8edea', '#fed6e3', '#d299c2']],
-        '3d-render': [['#e8e8e8', '#d4d4d4', '#a8a8a8'], ['#2a2a3a', '#4a4a6a', '#7a7a9a']],
-        'oil-painting': [['#8b4513', '#cd853f', '#deb887'], ['#2f4f4f', '#556b2f', '#8fbc8f']]
+        photorealistic: [['#2d4a6f', '#5a7fa8', '#8eb3d9']],
+        'digital-art': [['#1a1a3e', '#4a3f8a', '#8a6fd4']],
+        'concept-art': [['#2d1b4e', '#5a3d8a', '#9a6fd4']],
+        anime: [['#ff9a9e', '#fecfef', '#ffe4e6']],
+        '3d-render': [['#e8e8e8', '#d4d4d4', '#a8a8a8']],
+        'oil-painting': [['#8b4513', '#cd853f', '#deb887']]
     };
-    const schemes = colorSchemes[style] || colorSchemes['digital-art'];
-    const colors = schemes[Math.floor(Math.random() * schemes.length)];
+    const colors = colorSchemes[style]?.[0] || colorSchemes['digital-art'][0];
     
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, colors[0]);
@@ -334,18 +248,10 @@ function generateProceduralImage(prompt, style) {
     
     for (let i = 0; i < 8; i++) {
         const x = Math.random() * canvas.width, y = Math.random() * canvas.height, size = 20 + Math.random() * 60;
-        ctx.save();
-        ctx.globalAlpha = 0.1 + Math.random() * 0.2;
-        if (Math.random() > 0.5) {
-            const radGrad = ctx.createRadialGradient(x, y, 0, x, y, size);
-            radGrad.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-            radGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = radGrad;
-            ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
-        } else {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.fillRect(x - size/2, y - size/2, size, size * 0.6);
-        }
+        ctx.save(); ctx.globalAlpha = 0.1 + Math.random() * 0.2;
+        const radGrad = ctx.createRadialGradient(x, y, 0, x, y, size);
+        radGrad.addColorStop(0, 'rgba(255,255,255,0.8)'); radGrad.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = radGrad; ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
     
@@ -354,8 +260,8 @@ function generateProceduralImage(prompt, style) {
     for (let i = 0; i < data.length; i += 4) {
         const noise = (Math.random() - 0.5) * 15;
         data[i] = Math.max(0, Math.min(255, data[i] + noise));
-        data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + noise));
-        data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + noise));
+        data[i+1] = Math.max(0, Math.min(255, data[i+1] + noise));
+        data[i+2] = Math.max(0, Math.min(255, data[i+2] + noise));
     }
     ctx.putImageData(imageData, 0, 0);
     return canvas.toDataURL('image/png');
@@ -382,119 +288,92 @@ function displayGeneratedImage(imageData) {
     img.src = imageData;
 }
 
-function updateGenerateButton() { if (!elements.generateBtn) return; elements.generateBtn.classList.toggle('loading', state.isGenerating); elements.generateBtn.disabled = state.isGenerating; }
+function updateGenerateButton() {
+    if (!elements.generateBtn) return;
+    elements.generateBtn.classList.toggle('loading', state.isGenerating);
+    elements.generateBtn.disabled = state.isGenerating;
+}
 
 function saveToHistory(prompt, imageData, style, ratio) {
     const entry = { id: Date.now(), prompt, imageData, style, ratio, timestamp: new Date().toISOString() };
     state.history.unshift(entry);
-    state.gallery.unshift({ ...entry, isFavorite: false });
     if (state.history.length > 50) state.history = state.history.slice(0, 50);
     saveToStorage();
-    renderGallery();
     renderHistory();
 }
 
-function renderGallery(filter = 'all') {
-    let items = [...state.gallery];
-    if (filter === 'favorites') items = items.filter(item => item.isFavorite);
-    else if (filter === 'recent') items = items.slice(0, 12);
-    if (items.length === 0) { elements.galleryGrid.innerHTML = ''; elements.galleryEmpty.classList.add('visible'); return; }
-    elements.galleryEmpty.classList.remove('visible');
-    elements.galleryGrid.innerHTML = items.map(item => `
-        <div class="gallery-item" data-id="${item.id}">
-            <img src="${item.imageData}" alt="${item.prompt}">
-            <div class="gallery-item-overlay">
-                <p class="gallery-item-prompt">${item.prompt}</p>
-                <div class="gallery-item-actions">
-                    <button class="gallery-item-btn" title="Download" onclick="downloadImage('${item.id}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                    </button>
-                    <button class="gallery-item-btn ${item.isFavorite ? 'favorited' : ''}" title="Favorite" onclick="toggleFavorite('${item.id}')">
-                        <svg viewBox="0 0 24 24" fill="${item.isFavorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `).join('');
-    document.querySelectorAll('.gallery-item').forEach(item => { item.addEventListener('click', (e) => { if (!e.target.closest('.gallery-item-btn')) viewGalleryItem(item.dataset.id); }); });
-}
-
-function filterGallery(filter) { document.querySelectorAll('.filter-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.filter === filter); }); renderGallery(filter); }
-
-function viewGalleryItem(id) {
-    const item = state.gallery.find(i => i.id == id);
-    if (item) {
-        state.prompt = item.prompt;
-        elements.promptInput.value = item.prompt;
-        state.style = item.style;
-        state.aspectRatio = item.ratio;
-        displayGeneratedImage(item.imageData);
-        elements.styleBadge.textContent = item.style.replace('-', ' ');
-        elements.ratioBadge.textContent = item.ratio;
-        document.querySelectorAll('.style-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.style === item.style); });
-        document.querySelectorAll('.ratio-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.ratio === item.ratio); });
-        switchTab('create');
+function downloadImage() {
+    if (state.currentImage) {
+        const link = document.createElement('a');
+        link.download = `lumina-${Date.now()}.png`;
+        link.href = state.currentImage;
+        link.click();
+        showToast('Downloaded!');
     }
-}
-
-function toggleFavorite(id) {
-    const item = state.gallery.find(i => i.id == id);
-    if (item) { item.isFavorite = !item.isFavorite; saveToStorage(); renderGallery(document.querySelector('.filter-btn.active').dataset.filter); showToast(item.isFavorite ? 'Added to favorites' : 'Removed from favorites'); }
-}
-
-function downloadImage(id) {
-    const item = state.gallery.find(i => i.id == id) || (state.currentImage ? { imageData: state.currentImage } : null);
-    if (item) { const link = document.createElement('a'); link.download = `lumina-${item.id || Date.now()}.png`; link.href = item.imageData; link.click(); showToast('Image downloaded!'); }
 }
 
 function renderHistory() {
     if (state.history.length === 0) { elements.historyList.innerHTML = ''; elements.historyEmpty.classList.add('visible'); return; }
     elements.historyEmpty.classList.remove('visible');
     elements.historyList.innerHTML = state.history.map(item => `
-        <div class="history-item" onclick="viewGalleryItem('${item.id}')">
+        <div class="history-item" onclick="reusePrompt('${item.id}')">
             <div class="history-item-thumb"><img src="${item.imageData}" alt="${item.prompt}"></div>
             <div class="history-item-content">
                 <p class="history-item-prompt">${item.prompt}</p>
                 <div class="history-item-meta">
-                    <span class="history-item-style"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15 8.5L22 9.5L17 14.5L18 21.5L12 18.5L6 21.5L7 14.5L2 9.5L9 8.5L12 2Z"/></svg>${item.style.replace('-', ' ')}</span>
-                    <span class="history-item-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>${getTimeAgo(new Date(item.timestamp))}</span>
+                    <span class="history-item-style">${item.style.replace('-', ' ')}</span>
+                    <span class="history-item-time">${getTimeAgo(new Date(item.timestamp))}</span>
                 </div>
             </div>
             <div class="history-item-actions">
-                <button class="action-btn" title="Reuse prompt" onclick="event.stopPropagation(); reusePrompt('${item.id}')">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                <button class="action-btn" title="Download" onclick="event.stopPropagation(); downloadHistoryImage('${item.id}')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
                 </button>
             </div>
         </div>
     `).join('');
 }
 
-function reusePrompt(id) { const item = state.history.find(i => i.id == id); if (item) { elements.promptInput.value = item.prompt; state.prompt = item.prompt; switchTab('create'); showToast('Prompt loaded!'); } }
+function downloadHistoryImage(id) {
+    const item = state.history.find(i => i.id == id);
+    if (item) { const link = document.createElement('a'); link.download = `lumina-${item.id}.png`; link.href = item.imageData; link.click(); showToast('Downloaded!'); }
+}
 
-function clearHistory() { if (confirm('Clear all history?')) { state.history = []; state.gallery = []; saveToStorage(); renderHistory(); renderGallery(); showToast('History cleared'); } }
+function reusePrompt(id) {
+    const item = state.history.find(i => i.id == id);
+    if (item) { if (elements.promptInput) elements.promptInput.value = item.prompt; state.prompt = item.prompt; switchTab('create'); }
+}
+
+function clearHistory() {
+    if (confirm('Clear all history?')) { state.history = []; saveToStorage(); renderHistory(); showToast('History cleared'); }
+}
 
 function handleCanvasAction(index) {
     switch(index) {
-        case 0: if (state.currentImage) downloadImage(); break;
-        case 1: showToast('Share feature coming soon'); break;
-        case 2: showToast('Modify prompt and generate again'); break;
-        case 3: if (state.gallery.length > 0) { const latestItem = state.gallery[0]; latestItem.isFavorite = !latestItem.isFavorite; saveToStorage(); renderGallery(); showToast(latestItem.isFavorite ? 'Added to favorites' : 'Removed from favorites'); } break;
+        case 0: downloadImage(); break;
+        case 1: showToast('Share ready'); break;
+        case 2: showToast('Modify prompt'); break;
+        case 3: showToast('Saved in history'); break;
     }
 }
 
 function showInspirationPrompt() {
     const randomIndex = Math.floor(Math.random() * inspirationPrompts.length);
-    elements.inspirationText.style.opacity = '0';
-    setTimeout(() => { elements.inspirationText.textContent = inspirationPrompts[randomIndex]; elements.inspirationText.style.opacity = '1'; }, 200);
-    elements.inspirationText.parentElement.onclick = () => { elements.promptInput.value = inspirationPrompts[randomIndex]; state.prompt = inspirationPrompts[randomIndex]; showToast('Prompt applied!', 'info'); };
+    if (elements.inspirationText) {
+        elements.inspirationText.style.opacity = '0';
+        setTimeout(() => { elements.inspirationText.textContent = inspirationPrompts[randomIndex]; elements.inspirationText.style.opacity = '1'; }, 200);
+        elements.inspirationText.parentElement.onclick = () => {
+            if (elements.promptInput) elements.promptInput.value = inspirationPrompts[randomIndex];
+            state.prompt = inspirationPrompts[randomIndex];
+        };
+    }
 }
-
-function updateUI() { renderGallery(); renderHistory(); }
 
 function showToast(message, type = '') {
     elements.toast.className = 'toast visible';
     if (type) elements.toast.classList.add(type);
-    elements.toast.querySelector('.toast-message').textContent = message;
+    const msgEl = elements.toast.querySelector('.toast-message');
+    if (msgEl) msgEl.textContent = message;
     setTimeout(() => { elements.toast.classList.remove('visible'); }, 3000);
 }
 
@@ -505,7 +384,5 @@ function getTimeAgo(date) {
     return 'Just now';
 }
 
-window.downloadImage = downloadImage;
-window.toggleFavorite = toggleFavorite;
-window.viewGalleryItem = viewGalleryItem;
+window.downloadHistoryImage = downloadHistoryImage;
 window.reusePrompt = reusePrompt;

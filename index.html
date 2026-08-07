@@ -31,7 +31,6 @@
         </div>
         <nav class="nav">
             <button class="nav-btn active" data-tab="create">Create</button>
-            <button class="nav-btn" data-tab="gallery">Gallery</button>
             <button class="nav-btn" data-tab="history">History</button>
         </nav>
         <div class="header-actions">
@@ -295,29 +294,6 @@
                     <button class="quick-prompt" data-prompt="Majestic dragon perched on mountain peak, storm clouds gathering, dramatic lighting, fantasy art" onclick="applyPrompt(this.dataset.prompt)">Fantasy Dragon</button>
                     <button class="quick-prompt" data-prompt="Cozy coffee shop interior, rain outside window, warm lighting, steam rising from cups" onclick="applyPrompt(this.dataset.prompt)">Cozy Coffee Shop</button>
                 </div>
-            </div>
-        </section>
-
-        <section class="gallery-section" id="gallery-section">
-            <div class="gallery-header">
-                <h2 class="gallery-title">Your Creations</h2>
-                <div class="gallery-filters">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="favorites">Favorites</button>
-                    <button class="filter-btn" data-filter="recent">Recent</button>
-                </div>
-            </div>
-            <div class="gallery-grid" id="gallery-grid">
-                <!-- Gallery items will be populated here -->
-            </div>
-            <div class="gallery-empty" id="gallery-empty">
-                <svg viewBox="0 0 80 80" fill="none">
-                    <rect x="10" y="15" width="60" height="50" rx="5" stroke="currentColor" stroke-width="2"/>
-                    <circle cx="30" cy="35" r="8" stroke="currentColor" stroke-width="2"/>
-                    <path d="M20 55l15-15 10 10 15-15 10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <p>No creations yet</p>
-                <span>Start generating to build your gallery</span>
             </div>
         </section>
 
