@@ -2,15 +2,19 @@
 
 ![Lumina AI Banner](https://img.shields.io/badge/Lumina-AI%20Generator-pink?style=for-the-badge&logo=artstation&logoColor=white)
 
-> Create stunning visual masterpieces with AI-powered creativity. A modern web application inspired by Adobe Firefly.
+> Create stunning visual masterpieces with **Real AI** powered by Stable Diffusion. A modern web application inspired by Adobe Firefly.
 
 ![Preview](https://img.shields.io/badge/Status-Active-success?style=flat-square)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
-![HTML](https://img.shields.io/badge/HTML5-Canvas-orange?style=flat-square)
-![CSS](https://img.shields.io/badge/CSS3-Modern%20Design-purple?style=flat-square)
+![AI](https://img.shields.io/badge/AI-Stable%20Diffusion-blueviolet?style=flat-square)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=flat-square)
 
 ## ✨ Features
+
+### 🤖 Real AI Image Generation
+- **Stable Diffusion Integration** - Uses Hugging Face's Stable Diffusion 2.1 for realistic AI-generated images
+- **Free API Access** - Get your free API token from Hugging Face
+- **Fallback Mode** - Works without API for procedural generation
 
 ### Core Features
 - **🎯 Text-to-Image Generator** - Transform your imagination into visual art
@@ -28,6 +32,25 @@
 - **📜 History** - Track your generation history
 - **❤️ Favorites** - Save your best work
 - **⬇️ Download** - Export images as PNG
+
+## 🔧 Setup AI Generation
+
+### Get Your Free Hugging Face Token
+
+1. Go to [Hugging Face](https://huggingface.co/join)
+2. Create a free account
+3. Go to [Settings > Access Tokens](https://huggingface.co/settings/tokens)
+4. Create a new token with "Read" permissions
+5. Copy the token (starts with `hf_`)
+
+### Configure the App
+
+1. Click the ⚙️ Settings button in the header
+2. Paste your Hugging Face token
+3. Check "Use Real AI Generation"
+4. Click "Save Settings"
+
+Now your images will be generated using real AI!
 
 ## 🚀 Quick Start
 
